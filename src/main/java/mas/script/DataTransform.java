@@ -6,6 +6,13 @@ import java.util.stream.StreamSupport;
 
 public class DataTransform {
 
+    private final TimeParser parser;
+
+    public DataTransform() {
+        // not necessary DI
+        this.parser = new TimeParser();
+    }
+
     public List<String> reverseData(List<String> data) {
         return StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(descendingIterator(data), Spliterator.ORDERED), false)
@@ -21,6 +28,8 @@ public class DataTransform {
                 .stream()
                 .map(s -> s.replaceAll("^(.*?)\\t", ""))
                 .map(s -> s.replaceAll("\\t.*$", ""))
+                // below map: converts string time to Time, toSeconds return time in seconds
+                .map(time -> parser.timeInSeconds(time))
                 .collect(Collectors.toList());
     }
 
