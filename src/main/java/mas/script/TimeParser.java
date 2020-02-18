@@ -1,10 +1,15 @@
 package mas.script;
 
+import java.util.function.Function;
+
 public class TimeParser {
 
-    public String timeInSeconds(final String time) {
-        return this.stringToTime(time).toSeconds();
-    }
+    public final Function<String, String> timeInSeconds =
+            s -> this.stringToTime(s).toSeconds();
+
+//    public String timeInSeconds(final String time) {
+//        return this.stringToTime(time).toSeconds();
+//    }
     
     private Time stringToTime(final String time) {
         if (time == null)

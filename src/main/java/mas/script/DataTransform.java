@@ -1,6 +1,7 @@
 package mas.script;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -9,28 +10,30 @@ public class DataTransform {
     private final TimeParser parser;
 
     public DataTransform() {
-        // not necessary DI
         this.parser = new TimeParser();
     }
 
     public List<String> reverseData(List<String> data) {
         return StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(descendingIterator(data), Spliterator.ORDERED), false)
+                .stream(Spliterators.spliteratorUnknownSize(iterator.apply(data), Spliterator.ORDERED), false)
                 .collect(Collectors.toList());
     }
 
-    private Iterator<String> descendingIterator(List<String> data) {
-        return new LinkedList<>(data).descendingIterator();
-    }
+    private Function<List<String>, Iterator<String>> iterator =
+            (data) -> new LinkedList<>(data).descendingIterator();
 
     public List<String> inputAnalyzerFormat(List<String> data) {
         return data
                 .stream()
-                .map(s -> s.replaceAll("^(.*?)\\t", ""))
-                .map(s -> s.replaceAll("\\t.*$", ""))
-                // below map: converts string time to Time, toSeconds return time in seconds
-                .map(time -> parser.timeInSeconds(time))
+                .map(removeFirstAndLastColumn::apply)
+                .map(parser.timeInSeconds::apply)
                 .collect(Collectors.toList());
     }
 
+    private static Function<String, String> removeFirstColumn =
+            s -> s.replaceAll("^(.*?)\\t", "");
+    private static Function<String, String> removeLastColumn =
+            s -> s.replaceAll("\\t.*$", "");
+    private static Function<String, String> removeFirstAndLastColumn =
+            removeFirstColumn.andThen(removeLastColumn);
 }
